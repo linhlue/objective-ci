@@ -48,11 +48,11 @@ module ObjectiveCi
       if !opts[:xcodebuild_override] && xcode_version < 5.0
         puts_red "WARNING: Xcode version #{xcode_version} is less than 5.0, and tests will likely not run"
       end
-      
+
       sliced_opts = opts.select { |k, v| [:scheme, :workspace, :project].include?(k) }
       xcodebuild_opts_string = sliced_opts.reduce("") { |str, (k, v)| str += " -#{k} #{v}" }
 
-      xcodebuild_opts_string += " -destination name=iPad -destination-timeout=10 ONLY_ACTIVE_ARCH=NO test"
+      xcodebuild_opts_string += " -destination name=\"iPhone 6\" -destination-timeout=10 ONLY_ACTIVE_ARCH=NO test"
       call_binary("xcodebuild", xcodebuild_opts_string, ">&1 | bundle exec ocunit2junit", opts)
     end
 
