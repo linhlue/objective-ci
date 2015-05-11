@@ -34,6 +34,12 @@ module ObjectiveCi
       xcodebuild_opts_string = sliced_opts.reduce("") { |str, (k, v)| str += " -#{k} #{v}" }
       xcodebuild_opts_string += " ONLY_ACTIVE_ARCH=NO clean build"
 
+      if opts[:CODE_SIGN_IDENTITY]
+        xcodebuild_opts_string += " CODE_SIGN_IDENTITY=#{opts[:CODE_SIGN_IDENTITY]}"
+      end
+      if opts[:PROVISIONING_PROFILE]
+        xcodebuild_opts_string += " PROVISIONING_PROFILE=#{opts[:PROVISIONING_PROFILE]}"
+      end
       call_binary("xcodebuild", xcodebuild_opts_string, "| tee xcodebuild.log", opts)
       # oclint-xcodebuild will fail if we don't exclude Pods (absolute path)
       pods_dir = "#{Dir.pwd}/Pods"
@@ -52,7 +58,18 @@ module ObjectiveCi
       sliced_opts = opts.select { |k, v| [:scheme, :workspace, :project].include?(k) }
       xcodebuild_opts_string = sliced_opts.reduce("") { |str, (k, v)| str += " -#{k} #{v}" }
 
-      xcodebuild_opts_string += " -destination name=\"iPhone 6\" -destination-timeout=10 ONLY_ACTIVE_ARCH=NO test"
+      if opts[:destination_name]
+        xcodebuild_opts_string += " -destination name=#{opts[:destination_name]}"
+      else
+        xcodebuild_opts_string += " -destination name=\"iPhone 6\""
+      end
+      xcodebuild_opts_string += ' -destination-timeout=10 ONLY_ACTIVE_ARCH=NO test'
+      if opts[:CODE_SIGN_IDENTITY]
+        xcodebuild_opts_string += " CODE_SIGN_IDENTITY=#{opts[:CODE_SIGN_IDENTITY]}"
+      end
+      if opts[:PROVISIONING_PROFILE]
+        xcodebuild_opts_string += " PROVISIONING_PROFILE=#{opts[:PROVISIONING_PROFILE]}"
+      end
       call_binary("xcodebuild", xcodebuild_opts_string, ">&1 | bundle exec ocunit2junit", opts)
     end
 
